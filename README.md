@@ -114,12 +114,22 @@ apakah ini **kesalahan pada favorit** (perlu dikoreksi) atau memang boleh:
 - `060 Möbel Einbau` → 1 favorit `Möbel` (harusnya Einrichtung?)
 - `331 Feuerlöschposten` → 1 favorit `Einrichtung` (harusnya Feuerlöscheinrichtung?)
 
-### 🟡 Layer yang Namanya Tidak Terbaca
+### ✅ Layer `Index 154 / 156` — SUDAH TERESOLVE (bukan pertanyaan lagi)
 
-**[Q5]** Di XML favorit ada 21 elemen di layer `Index 154` (14× Stahl) dan
-`Index 156` (7× Fenster/Tür) — **nama layer tidak ikut terekspor**. Mohon
-arsitek sebutkan layer sebenarnya untuk kedua index ini, agar bisa dipetakan
-ke tabel aturan (dugaan: 046 Stahlkonstruktionen dan 021 Fenster Zubehör?).
+~~**[Q5]**~~ **Terselesaikan dari file XML** (`C:\Users\surya\Documents\favoriten`).
+Setiap favorit terkait punya **dua** tag `<Layer>`: satu placeholder nested-default
+tanpa nama (154/156) dan satu **layer element-level yang bernama** (yang dipakai
+elemen sebenarnya). Hasil resolusi:
+
+| Label audit | Layer sebenarnya | Klasifikasi | Verdict |
+|-------------|------------------|-------------|:-------:|
+| Index 154 (14 favorit `[Sk]`) | **046 Stahlkonstruktionen** (idx 541) | Stahl | ✅ PASS |
+| Index 156 – Fenster (4) | **021 Fenster Zubehör** (idx 543) | Fenster | ✅ PASS |
+| Index 156 – Tür (3) | **022 Tür Zubehör** (idx 544) | Tür | ✅ PASS |
+
+Kesimpulan: 21 favorit ini **konsisten** dengan aturan flow. `Index 154/156`
+hanya artefak serialisasi favorit — di project asli elemen duduk di layer
+bernama di atas. Tidak perlu validasi arsitek.
 
 ### 🟡 Elemen Bukaan (Fenster/Tür) — mewarisi layer host
 
