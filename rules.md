@@ -116,13 +116,54 @@ sudah **tervalidasi** oleh data favoriten.
 
 ---
 
+## Tabel 4 — Override name-token `(Layer, Element Type, Nama library-part)`
+
+Dimensi ketiga: override yang hanya berlaku bila **nama library-part**
+(`docu_UName`, yang tampil di Info Box) mengandung token tertentu. Ini membuat
+satu tool melayani dua maksud di layer yang sama — pintu lemari built-in yang
+dimodel dengan tool Door dikenali dari nama `Einbauschrank`. Dikonfirmasi
+2026-08-10. Cocok memakai **substring** (mis. "Einbauschrank 25" tetap kena).
+
+| # | Layer | Element Type | Token nama | Klasifikasi diizinkan |
+|--:|-------|--------------|-----------|-----------------------|
+| 1 | `010 Aussenwände` | Door | `Einbauschrank` | Einrichtung |
+| 2 | `015 Innenwände` | Door | `Einbauschrank` | Einrichtung |
+| 3 | `016 Trennwände` | Door | `Einbauschrank` | Einrichtung |
+| 4 | `060 Möbel Einbau` | Door | `Einbauschrank` | Einrichtung |
+
+Urutan resolusi: **token cocok → menang**; kalau tak ada token yang cocok →
+jatuh ke override tokenless (Tabel 3); lalu base rule (Tabel 1). Jadi pintu
+biasa (tanpa "Einbauschrank" di namanya) tetap **Tür**, tak terpengaruh. Nama
+library-part dibaca malas — hanya saat ada token override untuk `(layer,
+typeID)` — jadi mayoritas elemen tak kena biaya baca ekstra.
+
+---
+
+## Autofix — "Standarisasi Klasifikasi"
+
+Tombol di palette Multi-Task Audit (`LayerClassificationFixer::FixAll`) menyetel
+klasifikasi tiap elemen ke nilai *Expected*-nya, terbungkus satu undo:
+
+- Hanya layer dengan **satu** klasifikasi wajib yang diubah (mis. `700` →
+  Bedarfskörper, `021` → Fenster, pintu biasa → Tür).
+- Layer bernilai ganda (Window→{Fenster,Nische}, Door 015→{Tür,Einrichtung})
+  **dilewati** karena ambigu; layer di luar tabel dilewati.
+- Resolusi memakai jalur yang sama dengan audit — termasuk name-token, jadi
+  pintu `Einbauschrank` distandarkan ke Einrichtung, bukan Tür.
+
+---
+
 ## Kesimpulan
 
 Mesin aturan bertumpu pada **44 base rule** (satu layer → satu klasifikasi) yang
-diperbaiki di sembilan titik oleh **tabel override** `(layer, element type)`,
-sementara elemen host-child (Fenster/Tür/Dachfenster) sengaja tidak punya layer
-sendiri sehingga dinilai lewat layer host via override yang sama — dan seluruh
-struktur ini terbukti konsisten dengan data 504 favorit kecuali pada layer
-konstruksi bersama `020`/`026`/`050` (yang menampung banyak maksud dalam satu
-layer) serta satu titik risiko pintu `Einrichtung`, yang keduanya masih menunggu
-keputusan arsitek sebelum aturan tambahan dikunci.
+diperbaiki oleh **tabel override** `(layer, element type)` dan kini juga oleh
+override **name-token** `(layer, element type, nama library-part)` — sehingga
+pintu lemari `Einbauschrank` dikenali sebagai Einrichtung sementara pintu biasa
+tetap Tür. Elemen host-child (Fenster/Tür/Dachfenster) sengaja tak punya layer
+sendiri sehingga dinilai lewat layer host via override yang sama, dan tombol
+**Standarisasi Klasifikasi** dapat menulis balik nilai *Expected* untuk layer
+bernilai-tunggal. Seluruh struktur ini konsisten dengan data 504 favorit kecuali
+pada layer konstruksi bersama `020`/`026`/`050` (yang menampung banyak maksud
+dalam satu layer) serta satu titik risiko pintu `Einrichtung` di host selain
+`015`, yang keduanya masih menunggu keputusan arsitek sebelum aturan tambahan
+dikunci.
